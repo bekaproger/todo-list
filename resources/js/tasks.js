@@ -9,7 +9,7 @@ $('.tasks-finish-button').click(function(e){
             $(this).removeClass('btn-primary').addClass('btn-success').text('Finished');
         }
     }).catch((err) => {
-        showAxiosError(err.response.errors.error)
+        showAxiosError(err.response.data.error)
     })
 });
 

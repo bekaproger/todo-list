@@ -49441,7 +49441,7 @@ $('.tasks-finish-button').click(function (e) {
       $(_this).removeClass('btn-primary').addClass('btn-success').text('Finished');
     }
   })["catch"](function (err) {
-    showAxiosError(err.response.errors.error);
+    showAxiosError(err.response.data.error);
   });
 });
 

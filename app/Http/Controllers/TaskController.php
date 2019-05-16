@@ -103,8 +103,12 @@ class TaskController extends Controller
 
     public function finish($id)
     {
-        $task = Task::findOrFail($id);
-
+        $task = Task::find($id);
+        if(!$task){
+            return response()->json([
+                'error' => 'Task not found'
+            ], 404);
+        }
         $task->finished = !$task->finished;
         $task->save();
 
