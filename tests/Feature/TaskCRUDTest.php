@@ -51,16 +51,13 @@ class TaskCRUDTest extends TestCase
         $edit = $this->get($edit_url);
 
         //try to access all tasks
-        $index->assertStatus(302);
         $index->assertRedirect($this->login_url);
 
         //try to access create form
-        $create->assertStatus(302);
         $create->assertRedirect($this->login_url);
 
         //try to access edit form
         $edit->assertRedirect($this->login_url);
-        $edit->assertStatus(302);
     }
 
     public function test_unauthorized_user_cant_make_post_request()
