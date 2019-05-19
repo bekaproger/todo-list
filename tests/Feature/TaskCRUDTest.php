@@ -95,7 +95,7 @@ class TaskCRUDTest extends TestCase
             'task' => 'Specific task'
         ];
 
-        $res = $this->actingAs($this->user)->post( '/tasks' ,$data);
+        $res = $this->actingAs($this->user)->post( route('tasks.store') ,$data);
 
         $res->assertRedirect($this->url);
 
