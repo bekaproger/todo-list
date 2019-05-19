@@ -4,9 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Task;
 use Illuminate\Http\Request;
+use App\Http\Requests\TaskPostRequest;
+use App\Services\TaskService;
 
 class TaskController extends Controller
 {
+
+    protected $service;
+
+    public function __construct(TaskService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +24,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $tasks = auth()->user()->userTasks()->paginate(50);
+        $tasks = auth()->user()->userTasks()->with('taskUser')->paginate(50);
         return view('tasks.index', ['tasks' => $tasks]);
     }
 
@@ -34,16 +44,10 @@ class TaskController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(TaskPostRequest $request)
     {
-        $request->validate([
-            'task' => 'required|string|max:250'
-        ]);
-
-        Task::create([
-            'task' => $request->task,
-            'user_id' => auth()->id()
-        ]);
+        
+        $this->service->createTask($request->task);
 
         return redirect()->route('tasks.index');
     }
@@ -77,13 +81,9 @@ class TaskController extends Controller
      * @param  \App\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Task $task)
+    public function update(TaskPostRequest $request, Task $task)
     {
-        $request->validate([
-            'task' => 'required|string|max:250',
-        ]);
-
-        $task->update($request->only(['task', 'finished']));
+        $task->update($request->only(['task']));
 
         return redirect()->route('tasks.index');
     }
@@ -101,16 +101,28 @@ class TaskController extends Controller
         return redirect()->route('tasks.index');
     }
 
+    /**
+    * Finish the task
+    *
+    * @param string|integer $id
+    * @return \Illuminate\Http\Response
+    */
     public function finish($id)
     {
         $task = Task::find($id);
+
+        //if the task is not found return error response
         if(!$task){
             return response()->json([
                 'error' => 'Task not found'
             ], 404);
         }
-        $task->finished = !$task->finished;
-        $task->save();
+        
+        try{
+            $this->service->finishTask($task);
+        }catch(\Exception $e){
+            return response()->json($e->getMessage(), 500);
+        }
 
         return response()->json('', 201);
     }

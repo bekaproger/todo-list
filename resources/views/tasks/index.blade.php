@@ -8,10 +8,10 @@
         </div>
 
         <div class="row">
-            <a class="btn btn-primary" href="{{route('tasks.create')}}">
+            <a class="btn btn-primary task-add-button" href="{{route('tasks.create')}}">
                 Add Task
             </a>
-            <table class="table" style="background: #fff">
+            <table class="table tasks-table" style="background: #fff">
                 <thead>
                 <tr>
                     <th>#</th>
@@ -31,7 +31,7 @@
                             </button>
                         </td>
                         <td>
-                            <a href="{{route('tasks.edit', ['id' => $task->id])}}" class="btn btn-primary">
+                            <a href="{{route('tasks.edit', ['id' => $task->id])}}" class="btn task-edit-button btn-primary">
                                 Edit
                             </a>
                         </td>
@@ -39,7 +39,7 @@
                             <form method="POST" action="{{route('tasks.destroy', ['id' => $task->id])}}">
                                 @method('DELETE')
                                 @csrf
-                                <button class="btn btn-danger" type="submit">
+                                <button class="btn btn-danger task-delete-button" type="submit">
                                     Delete
                                 </button>
                             </form>
