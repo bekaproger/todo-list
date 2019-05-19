@@ -17,6 +17,6 @@ class TaskService
 	public function finishTask(Task $task)
 	{
 		$task->finished = !$task->finished;
-		$task->saveOrFail();
+		$task->save();
 	}
 }
