@@ -114,9 +114,18 @@ class TaskCRUDTest extends TestCase
         $this->assertEquals($finished_task->finished, !$this->task->finished);
     }
 
-    public function text_user_can_delete_task()
+    public function test_user_cant_finish_not_exiting_task()
     {
-        $res = $this->actingAs($this->user)->post($this->url . $this->task->id);
+        $task_id = 'non_existing_id';
+        $url = $this->url . $task_id . '/finish';
+        //try to finish non exiting task
+        $res = $this->actingAs($this->user)->post($url);
+        $res->assertNotFound();
+    }
+
+    public function test_user_can_delete_task()
+    {
+        $res = $this->actingAs($this->user)->delete($this->url . $this->task->id);
 
         $res->assertRedirect($this->url);
 

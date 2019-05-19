@@ -109,21 +109,11 @@ class TaskController extends Controller
     */
     public function finish($id)
     {
-        $task = Task::find($id);
-
-        //if the task is not found return error response
-        if(!$task){
-            return response()->json([
-                'error' => 'Task not found'
-            ], 404);
-        }
-        
         try{
-            $this->service->finishTask($task);
+            $this->service->finishTask($id);
         }catch(\Exception $e){
-            return response()->json($e->getMessage(), 500);
+            return response()->json($e->getMessage(), $e->getCode());
         }
-
         return response()->json('', 201);
     }
 }

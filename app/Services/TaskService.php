@@ -14,8 +14,14 @@ class TaskService
 		return $task;
 	}
 
-	public function finishTask(Task $task)
+	public function finishTask($id)
 	{
+	    $task = Task::find($id);
+
+        //if the task is not found return error response
+        if(!$task){
+            throw new \Exception('Task not found', 404);
+        }
 		$task->finished = !$task->finished;
 		$task->save();
 	}
