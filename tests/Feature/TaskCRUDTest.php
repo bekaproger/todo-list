@@ -20,12 +20,15 @@ class TaskCRUDTest extends TestCase
 
     protected $task;
 
+    protected $login_url;
+
     public function setUp() : void
     {
         parent::setUp();
         $this->user = factory(User::class)->create();
         $this->task = factory(Task::class)->create(['user_id' => $this->user->id]);
-        $this->url = '/tasks/';
+        $this->url = route('tasks.index') ;
+        $this->login_url = route('login');
     }
 
 
@@ -38,12 +41,52 @@ class TaskCRUDTest extends TestCase
         $res->assertSee('tasks-table');
     }
 
-    public function test_unauthorized_user_cant_review_tasks()
+    public function test_unauthorized_user_cant_review_tasks_and_make_get_requests()
     {
-        $res = $this->get($this->url);
+        $create_url = route('tasks.create');
+        $edit_url = route('tasks.edit', ['id' => $this->task->id]);
 
-        $res->assertStatus(302);
-        $res->assertRedirect('/login');
+        $index = $this->get($this->url);
+        $create = $this->get($create_url);
+        $edit = $this->get($edit_url);
+
+        //try to access all tasks
+        $index->assertStatus(302);
+        $index->assertRedirect($this->login_url);
+
+        //try to access create form
+        $create->assertStatus(302);
+        $create->assertRedirect($this->login_url);
+
+        //try to access edit form
+        $edit->assertRedirect($this->login_url);
+        $edit->assertStatus(302);
+    }
+
+    public function test_unauthorized_user_cant_make_post_request()
+    {
+        $task_id = $this->task->id;
+        $create_url = route('tasks.store');
+        $update_url = route('tasks.update', ['id' => $task_id]);
+        $finish_url = route('tasks.finish', ['id' => $task_id]);
+        $delete_url = route('tasks.destroy', ['id' => $task_id]) ;
+        //we use this data when we try to create or update a task
+        $data = [
+            'task' => 'Task'
+        ];
+        //try to create task
+        $create = $this->post($create_url, $data);
+        //try to edit task
+        $update = $this->put($update_url, $data);
+        //try to finish
+        $finish = $this->post($finish_url);
+        //try to delete task
+        $delete = $this->delete($delete_url);
+
+        $create->assertRedirect($this->login_url);
+        $update->assertRedirect($this->login_url);
+        $finish->assertRedirect($this->login_url);
+        $delete->assertRedirect($this->login_url);
     }
 
     public function test_user_can_create_task()
@@ -78,7 +121,7 @@ class TaskCRUDTest extends TestCase
             'task' => 'Task edited'
         ];
 
-        $url = $this->url . $this->task->id;
+        $url = route('tasks.update', ['id' => $this->task->id]);
         $res = $this->actingAs($this->user)->put($url, $data);
 
         $res->assertRedirect($this->url);
@@ -92,7 +135,7 @@ class TaskCRUDTest extends TestCase
     public function test_user_cant_update_test_without_task_given()
     {
         $data = [];
-        $url = $this->url . $this->task->id;
+        $url = route('tasks.update', ['id' => $this->task->id]);
         $res = $this->actingAs($this->user)->put($url, $data);
         //if no task is supplied task error message returned
         $res->assertSessionHasErrors(['task']);
@@ -100,7 +143,7 @@ class TaskCRUDTest extends TestCase
 
     public function test_user_can_finish_task()
     {
-        $url = $this->url . $this->task->id . '/finish';
+        $url = route('tasks.finish', ['id'=> $this->task->id]);
 
         $res = $this->actingAs($this->user)->post($url);
 
@@ -117,7 +160,7 @@ class TaskCRUDTest extends TestCase
     public function test_user_cant_finish_not_exiting_task()
     {
         $task_id = 'non_existing_id';
-        $url = $this->url . $task_id . '/finish';
+        $url = route('tasks.finish', ['id'=> $task_id]);
         //try to finish non exiting task
         $res = $this->actingAs($this->user)->post($url);
         $res->assertNotFound();
@@ -125,7 +168,8 @@ class TaskCRUDTest extends TestCase
 
     public function test_user_can_delete_task()
     {
-        $res = $this->actingAs($this->user)->delete($this->url . $this->task->id);
+        $url = route('tasks.destroy', ['id' => $this->task->id]);
+        $res = $this->actingAs($this->user)->delete($url);
 
         $res->assertRedirect($this->url);
 
