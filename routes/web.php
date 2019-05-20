@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('tasks.index');
 });
 
 Route::post('/tasks/{id}/finish', 'TaskController@finish')->middleware('auth')->name('tasks.finish');
