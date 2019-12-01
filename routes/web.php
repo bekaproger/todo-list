@@ -12,11 +12,11 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('tasks.index');
 });
 
 Route::post('/tasks/{id}/finish', 'TaskController@finish')->middleware('auth')->name('tasks.finish');
-Route::resource('/tasks', 'TaskController')->middleware('auth');
+Route::resource('/tasks', 'TaskController')->except(['show'])->middleware('auth');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
